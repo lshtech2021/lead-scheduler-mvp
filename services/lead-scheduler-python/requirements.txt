@@ -11,3 +11,5 @@ python-multipart
 pytest
 requests
 loguru
+redis
+rq

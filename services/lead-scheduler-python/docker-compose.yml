@@ -13,6 +13,22 @@ services:
       - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
       - PUBLIC_URL=${PUBLIC_URL}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - db
+      - redis
+  worker:
+    build: .
+    command: rq worker --url ${REDIS_URL} followups
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/scheduler
+      - REDIS_URL=${REDIS_URL}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+    depends_on:
+      - db
+      - redis
   db:
     image: postgres:15
     environment:
@@ -23,5 +39,9 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 volumes:
   pgdata:
