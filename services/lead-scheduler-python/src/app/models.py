@@ -28,6 +28,7 @@ class Lead(Base):
     client = relationship("Client", back_populates="leads")
     messages = relationship("Message", back_populates="lead")
     bookings = relationship("Booking", back_populates="lead")
+    proposals = relationship("Proposal", back_populates="lead")
 
     __table_args__ = (UniqueConstraint("client_id", "external_id", name="uq_client_external"),)
 
@@ -86,3 +87,29 @@ class EventLog(Base):
     event_type = Column(String)
     payload = Column(JSON)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class OutboundSend(Base):
+    """Idempotency for outbound SMS: (lead_id, message_type, idempotency_key) unique."""
+    __tablename__ = "outbound_sends"
+    id = Column(Integer, primary_key=True)
+    lead_id = Column(Integer, ForeignKey("leads.id"), nullable=False)
+    message_type = Column(String, nullable=False)
+    idempotency_key = Column(String, nullable=False)
+    message_id = Column(Integer, ForeignKey("messages.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("lead_id", "message_type", "idempotency_key", name="uq_outbound_idempotency"),)
+
+
+class Proposal(Base):
+    """Proposed slot per lead for confirmation flow."""
+    __tablename__ = "proposals"
+    id = Column(Integer, primary_key=True)
+    lead_id = Column(Integer, ForeignKey("leads.id"), nullable=False)
+    slot_start = Column(DateTime(timezone=True), nullable=False)
+    slot_end = Column(DateTime(timezone=True), nullable=False)
+    proposed_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    lead = relationship("Lead", back_populates="proposals")

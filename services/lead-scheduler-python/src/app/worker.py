@@ -8,6 +8,6 @@ redis_conn = Redis.from_url(redis_url)
 
 if __name__ == "__main__":
     with Connection(redis_conn):
-        qs = [Queue("followups")]
+        qs = [Queue("followups"), Queue("leads")]
         worker = Worker(qs)
         worker.work()

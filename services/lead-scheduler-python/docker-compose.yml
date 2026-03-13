@@ -19,7 +19,7 @@ services:
       - redis
   worker:
     build: .
-    command: rq worker --url ${REDIS_URL} followups
+    command: rq worker --url ${REDIS_URL} followups leads
     environment:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/scheduler
       - REDIS_URL=${REDIS_URL}
