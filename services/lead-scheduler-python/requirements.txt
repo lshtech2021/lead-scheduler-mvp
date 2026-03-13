@@ -7,7 +7,11 @@ pydantic
 python-dotenv
 httpx
 twilio
+google-api-python-client
+google-auth
 python-multipart
 pytest
 requests
 loguru
+redis
+rq
